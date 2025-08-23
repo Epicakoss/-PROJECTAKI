@@ -136,7 +136,8 @@ if uploaded_file is not None:
 
         # Display results
         st.write("### Predictions")
-        st.dataframe(test_data)           
+        st.dataframe(test_data)      
+          
     with tab7:
         st.write("""
         ## About Us
@@ -171,6 +172,7 @@ if uploaded_file is not None:
 # Add a message to the user if no file has been uploaded yet.
 if df is None:
     st.info("Awaiting for a file to be uploaded.")
+
 
 
 
