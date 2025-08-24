@@ -7,22 +7,31 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 import joblib
-
+from PIL import Image
 # Streamlit app for interactive widgets
 
+#Load and display an image
+image = Image.open('experiment icon image.jpg')
+
+#Config function
+st.set_page_config(
+    page_title="Data Analysis and Modeling App",
+    page_icon=image
+)
+
 # --- Title of the App ---
-st.title("Interactive Data Analysis and Modeling App")
+st.title(":test_tube: Interactive Data Analysis and Modeling App")
 
 #Add a Sidebar
-st.sidebar.title("Visualization Options")
-st.sidebar.write("Upload a dataset and explore various features")
+st.sidebar.title(":loudspeaker: Visualization Options")
+st.sidebar.write(":minidisc: Upload a dataset and explore various features")
 
 global df
 df = None
 #Setup Sidebar file upload
 uploaded_file = st.sidebar.file_uploader(
     "Upload your data file", 
-    type=["h5ad", "hdf5", "csv", "xlsx"], 
+    type=["h5ad", "hdf5", "csv", "xlsx"],
     label_visibility="collapsed"
 )
 
@@ -58,33 +67,38 @@ if uploaded_file is not None:
         st.dataframe(df)
 
     with tab2:
-        #Summary Statistics and Clustering
-        st.write("### Summary Statistics")
-        st.write(df.describe())
-        #Sidebar for clustering
-        st.sidebar.header("Settings")
-        if uploaded_file is not None:
-            k = st.sidebar.slider("Number of Clusters", 2, 10, 3)
-            kmeans = KMeans(n_clusters=k, random_state=42)
-            df['Cluster'] = kmeans.fit_predict(df.iloc[:, :-1])
-            #The last two lines are commented out because it appears in the tabs section
-            st.write("### Clustering Results")
-            st.dataframe(df)
+        with st.expander(":arrow_double_down: Summary Statistics"):
+            with st.container(border=True):
+                #Summary Statistics and Clustering
+                st.write("### Show Summary Statistics")
+                st.write(df.describe())
+        with st.expander(":arrow_double_down: Clustering Results"):
+            with st.container(border=True):
+                #Sidebar for clustering
+                st.sidebar.header(":bulb: Settings")
+                if uploaded_file is not None:
+                    k = st.sidebar.slider("Number of Clusters", 2, 10, 3)
+                    kmeans = KMeans(n_clusters=k, random_state=42)
+                    df['Cluster'] = kmeans.fit_predict(df.iloc[:, :-1])
+                    #The last two lines are commented out because it appears in the tabs section
+                    st.write("### Show Clustering Results")
+                    st.dataframe(df)
 
     with tab3:
         #Plotting options
-        x_axis = st.selectbox("X-axis", df.columns[:-1])
-        y_axis = st.selectbox("Y-axis", df.columns[:-1])
+        st.write("### Scatter Plot")
+        x_axis = st.selectbox(":chart: X-axis", df.columns[:-1])
+        y_axis = st.selectbox(":chart: Y-axis", df.columns[:-1])
         fig = px.scatter(df, x=x_axis, y=y_axis, color=df.columns[-1])
         st.plotly_chart(fig)
 
     with tab4:
-        search_term = st.text_input("Filter Species:")
+        search_term = st.text_input(":dart: Filter Species:")
         filtered_df = df[df[df.columns[-1]].astype(str).str.contains(search_term, case=False, na=False)]
         st.dataframe(filtered_df)
 
     with tab5:
-        st.write("This tab uses the uploaded data to train a model.")
+        st.write(":jigsaw: This tab uses the uploaded data to train a model.")
         
         # We add a button to prevent the model from retraining every time you interact
         # with another widget.
@@ -112,8 +126,8 @@ if uploaded_file is not None:
     with tab6:
       #Predict on New Data
       st.write(" Upload the neccessary files to predict on new data.") 
-      uploaded_model = st.file_uploader("Upload Trained Model", type=["pkl"])
-      uploaded_test = st.file_uploader("Upload Test CSV", type=["csv"])
+      uploaded_model = st.file_uploader(":jigsaw: Upload Trained Model", type=["pkl"])
+      uploaded_test = st.file_uploader(":jigsaw: Upload Test CSV", type=["csv"])
 
       if uploaded_model and uploaded_test:
         # Load trained model
@@ -136,9 +150,10 @@ if uploaded_file is not None:
 
         # Display results
         st.write("### Predictions")
-        st.dataframe(test_data)      
-          
+        st.dataframe(test_data)
+
     with tab7:
+        #About Us
         st.write("""
         ## About Us
         This application was developed by a team of informatics to facilitate interactive data analysis and modeling. 
@@ -160,7 +175,7 @@ if uploaded_file is not None:
         Παυσανίας Κόντος(inf2022083):
         - Assisted in the development and testing of the application(Machine learning studying and coding).
         - Containerized the application using Docker for easy deployment.
-        - Created comprehensive documentation and reports using LaTeX.
+        - Created comprehensive documentation and report using LaTeX.
         - Emotional Support during the development process. :P <3
         - "Nah I'd win"
         """)
@@ -172,6 +187,7 @@ if uploaded_file is not None:
 # Add a message to the user if no file has been uploaded yet.
 if df is None:
     st.info("Awaiting for a file to be uploaded.")
+
 
 
 
