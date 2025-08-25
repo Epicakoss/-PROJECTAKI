@@ -2,6 +2,7 @@
 import streamlit as st
 import plotly.express as px
 import pandas as pd
+import plotly.express as px 
 from sklearn.cluster import KMeans
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
@@ -48,8 +49,7 @@ if uploaded_file is not None:
 # Display the DataFrame if it exists
 global numeric_columns
 try:
-    # Display the DataFrame
-    #st.write(df)
+    # Display the DataFrame if it exists
     numeric_columns = list (df.select_dtypes(['float','int']).columns)
 except Exception as e:
     print (e)
@@ -65,7 +65,6 @@ if uploaded_file is not None:
         #Display the uploaded data
         st.write("### Uploaded Data")
         st.dataframe(df)
-
     with tab2:
         with st.expander(":arrow_double_down: Summary Statistics"):
             with st.container(border=True):
@@ -83,7 +82,6 @@ if uploaded_file is not None:
                     #The last two lines are commented out because it appears in the tabs section
                     st.write("### Show Clustering Results")
                     st.dataframe(df)
-
     with tab3:
         #Plotting options
         st.write("### Scatter Plot")
@@ -91,43 +89,49 @@ if uploaded_file is not None:
         y_axis = st.selectbox(":chart: Y-axis", df.columns[:-1])
         fig = px.scatter(df, x=x_axis, y=y_axis, color=df.columns[-1])
         st.plotly_chart(fig)
-
     with tab4:
         search_term = st.text_input(":dart: Filter Species:")
         filtered_df = df[df[df.columns[-1]].astype(str).str.contains(search_term, case=False, na=False)]
         st.dataframe(filtered_df)
-
     with tab5:
         st.write(":jigsaw: This tab uses the uploaded data to train a model.")
-        
         # We add a button to prevent the model from retraining every time you interact
         # with another widget.
         if st.button("Train Model"):
-            # It uses the 'df' that was already loaded when you uploaded the file.
 
-            # We assume the last column is the target (y) and all others are features (X).
-            X = df.iloc[:, :-1]
+            # Assume the last column is the target
             y = df.iloc[:, -1]
-            
-            # Split the data
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-            
-            # Create and train the model
-            clf = RandomForestClassifier()
-            clf.fit(X_train, y_train)
-            
-            # Make predictions and calculate accuracy
-            preds = clf.predict(X_test)
-            acc = accuracy_score(y_test, preds)
 
-            # Display the result
-            st.write(f"### Model Accuracy: {acc:.2f}")
+            # A simple way is to just take all numeric columns as features
+            X = df[numeric_columns]
 
+            # If the target column is in numeric_columns, drop it from X
+            if y.name in X.columns:
+                X = X.drop(columns=[y.name])
+            # Check if X is empty after dropping the target column
+            if X.empty:
+                st.error("No valid feature columns found for training. Please check your data.")
+            else:
+                # Create and train the model
+
+                # Split the data
+                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+            
+                # Create and train the model
+                clf = RandomForestClassifier()
+                clf.fit(X_train, y_train)
+            
+                # Make predictions and calculate accuracy
+                preds = clf.predict(X_test)
+                acc = accuracy_score(y_test, preds)
+
+                # Display the result
+                st.write(f"### Model Accuracy: {acc:.2f}")
     with tab6:
       #Predict on New Data
       st.write(" Upload the neccessary files to predict on new data.") 
-      uploaded_model = st.file_uploader(":jigsaw: Upload Trained Model", type=["pkl"])
-      uploaded_test = st.file_uploader(":jigsaw: Upload Test CSV", type=["csv"])
+      uploaded_model = st.file_uploader(":jigsaw: Upload Trained Model", type=["pkl"],key="model_uploader")#ADDED KEY
+      uploaded_test = st.file_uploader(":jigsaw: Upload Test CSV", type=["csv"],key="test_data_uploader")#ADDED KEY
 
       if uploaded_model and uploaded_test:
         # Load trained model
@@ -151,7 +155,6 @@ if uploaded_file is not None:
         # Display results
         st.write("### Predictions")
         st.dataframe(test_data)
-
     with tab7:
         #About Us
         st.write("""
