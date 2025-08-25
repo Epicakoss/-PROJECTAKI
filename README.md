@@ -1,6 +1,5 @@
 # -PROJECTAKI
-EMERGENCY PROJECT
-ΓΕΙΙΑΑΑΑ
+PROJECT GUIDE/ORIGINAL PLAN
 
 Κατανόηση του Pipeline και των Δεδομένων:
 
